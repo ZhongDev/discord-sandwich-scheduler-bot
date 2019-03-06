@@ -88,6 +88,8 @@ client.on('message', message => {
                                 dssbDB.set('balance', JSON.stringify(balanceobj))
                                 message.reply('Balance is now $' + balanceobj[message.guild.id] / 100)
                             })
+                    }else{
+                        message.reply('The money value provided does not seem to be valid. Please try again.')
                     }
                 }
             } else {
@@ -118,6 +120,8 @@ client.on('message', message => {
                                 dssbDB.set('balance', JSON.stringify(balanceobj))
                                 message.reply('Balance is now $' + balanceobj[message.guild.id] / 100)
                             })
+                    }else{
+                        message.reply('The money value provided does not seem to be valid. Please try again.')
                     }
                 }
             } else {
@@ -152,6 +156,116 @@ client.on('message', message => {
                         balanceobj[message.guild.id] = 0
                     }
                     message.reply('Balance is $' + balanceobj[message.guild.id] / 100)
+                })
+            break
+        
+        case `${PREFIX}addchoice`:
+            if(isGuildOwner){
+                if (arguments.length < 2) {
+                    message.reply('To add a choice please use `' + PREFIX + 'addchoice <choice> <price in dollars>`')
+                } else {
+                    var moneymatches = arguments[arguments.length - 1].match(moneyRgx)
+                    arguments.pop()
+                    var sandwich = arguments.join(' ')
+                    if (moneymatches) {
+                        var choiceCostCents = Math.round(parseFloat(moneymatches[1] + moneymatches[2]) * 100)
+                        message.reply('Adding ' + sandwich + ' with the price of $' + choiceCostCents / 100 + ' to the list of choices.')
+                        dssbDB.get('choices')
+                            .then((choices) => {
+                                if (choices == undefined) {
+                                    var choicesobj = {}
+                                } else {
+                                    var choicesobj = JSON.parse(choices)
+                                }
+                                if (choicesobj[message.guild.id] == undefined) {
+                                    choicesobj[message.guild.id] = []
+                                }
+                                var alreadyExist = choicesobj[message.guild.id].some(sandwichObj => {
+                                    return sandwichObj.sandwich === sandwich
+                                })
+                                if(alreadyExist){
+                                    message.reply('A sandwich with the same name already exists. Please remove it first to readd it.')
+                                    return
+                                }
+                                choicesobj[message.guild.id].push({
+                                    sandwich,
+                                    cost: choiceCostCents
+                                })
+                                dssbDB.set('choices', JSON.stringify(choicesobj))
+                                message.reply(sandwich + ' with the price of $' + choiceCostCents / 100 + ' has been successfully added to the list of choices.')
+                                var choicelist = []
+                                choicesobj[message.guild.id].forEach(choice => {
+                                    choicelist.push('`' + choice.sandwich + '` `$' + choice.cost/100 + '`')
+                                });
+                                var choicelistStr = choicelist.join('\n')
+                                message.reply('Current Choices are :\n' + choicelistStr)
+                            })
+                    }else{
+                        message.reply('The money value provided does not seem to be valid. Please try again.')
+                    }
+                }
+            }else{
+                message.reply('Only the server owner can use this command.')
+            }
+            break
+        
+        case `${PREFIX}removechoice`:
+            if(isGuildOwner){
+                if (arguments.length < 1) {
+                    message.reply('To remove a choice please use `' + PREFIX + 'removechoice <choice>`')
+                } else {
+                    var sandwich = arguments.join(' ')
+                    message.reply('Removing ' + sandwich + ' from the list of choices.')
+                    dssbDB.get('choices')
+                        .then((choices) => {
+                            if (choices == undefined) {
+                                var choicesobj = {}
+                            } else {
+                                var choicesobj = JSON.parse(choices)
+                            }
+                            if (choicesobj[message.guild.id] == undefined) {
+                                choicesobj[message.guild.id] = []
+                            }
+                            var alreadyExist = choicesobj[message.guild.id].some(sandwichObj => {
+                                return sandwichObj.sandwich === sandwich
+                            })
+                            if(!alreadyExist){
+                                message.reply('The specified sanwich does not exist in the choice list. Please check your capilization and try again.')
+                                return
+                            }
+                            choicesobj[message.guild.id] = choicesobj[message.guild.id].filter(obj => obj.sandwich !== sandwich)
+                            dssbDB.set('choices', JSON.stringify(choicesobj))
+                            message.reply(sandwich + ' has been removed from the list of choices.')
+                            var choicelist = []
+                            choicesobj[message.guild.id].forEach(choice => {
+                                choicelist.push('`' + choice.sandwich + '` `$' + choice.cost/100 + '`')
+                            });
+                            var choicelistStr = choicelist.join('\n')
+                            message.reply('Current Choices are :\n' + choicelistStr)
+                        })
+                }
+            }else{
+                message.reply('Only the server owner can use this command.')
+            }
+            break
+
+        case `${PREFIX}choices`:
+            dssbDB.get('choices')
+                .then((choices) => {
+                    if (choices == undefined) {
+                        var choicesobj = {}
+                    } else {
+                        var choicesobj = JSON.parse(choices)
+                    }
+                    if (choicesobj[message.guild.id] == undefined) {
+                        choicesobj[message.guild.id] = []
+                    }
+                    var choicelist = []
+                    choicesobj[message.guild.id].forEach(choice => {
+                        choicelist.push('`' + choice.sandwich + '` `$' + choice.cost/100 + '`')
+                    });
+                    var choicelistStr = choicelist.join('\n')
+                    message.reply('Current Choices are :\n' + choicelistStr)
                 })
             break
     }
