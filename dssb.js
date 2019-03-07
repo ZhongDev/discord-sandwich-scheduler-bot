@@ -94,14 +94,28 @@ client.on('message', message => {
                                         var selected = choicesNotBlacklisted[Math.floor(Math.random() * choicesNotBlacklisted.length)]
                                         message.reply('The sandwich that has been rolled is ...')
                                         setTimeout(function(){
-                                            console.log(selected)
+                                            var selectedSandwich = selected
                                             message.reply(selected.sandwich + " ($"+ selected.cost/100 + ")")
+                                            dssbDB.get('selected')
+                                                .then((selected) => {
+                                                    if (selected == undefined) {
+                                                        var selectedobj = {}
+                                                    } else {
+                                                        var selectedobj = JSON.parse(selected)
+                                                    }
+                                                    if (selectedobj[message.guild.id] == undefined) {
+                                                        selectedobj[message.guild.id] = {}
+                                                    }
+                                                    selectedobj[message.guild.id] = selectedSandwich;
+                                                    var selectedjson = JSON.stringify(selectedobj)
+                                                    dssbDB.set('selected', selectedjson)
+                                                })
                                             client.channels.get(channelobj[message.guild.id].tommorowssandwich).fetchMessages()
                                                 .then((list)=>{
                                                     return client.channels.get(channelobj[message.guild.id].tommorowssandwich).bulkDelete(list);
                                                 })
                                                 .then(() => {
-                                                    client.channels.get(channelobj[message.guild.id].tommorowssandwich).send('selected.sandwich + " ($"+ selected.cost/100 + ")"')
+                                                    client.channels.get(channelobj[message.guild.id].tommorowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ")")
                                                 })
                                                 .catch((err) => {
                                                     console.err(err)
