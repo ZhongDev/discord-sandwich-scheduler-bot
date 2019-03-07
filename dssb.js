@@ -8,8 +8,6 @@ const client = new Discord.Client()
 const Keyv = require('keyv')
 const moment = require('moment')
 const dssbDB = new Keyv('sqlite://' + __dirname + '/dssbDB.sqlite', { namespace: 'dssb' })
-const blacklistDB = new Keyv('sqlite://' + __dirname + '/dssbDB.sqlite', { namespace: 'blacklist' })
-blacklistDB.on('error', (err) => { console.error(err) })
 dssbDB.on('error', (err) => { console.error(err) })
 
 /// Regex
