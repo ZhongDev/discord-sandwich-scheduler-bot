@@ -113,7 +113,8 @@ client.on('message', message => {
                                                     return client.channels.get(channelobj[message.guild.id].tommorowssandwich).bulkDelete(list);
                                                 })
                                                 .then(() => {
-                                                    client.channels.get(channelobj[message.guild.id].tommorowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ")")
+                                                    var remainingbalance = (balanceobj[message.guild.id] - selected.cost)/100
+                                                    client.channels.get(channelobj[message.guild.id].tommorowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ") -- $" + remainingbalance + " remain after purchase")
                                                 })
                                                 .catch((err) => {
                                                     console.err(err)
