@@ -47,8 +47,8 @@ client.on('message', message => {
                         if (channelobj[message.guild.id] == undefined) {
                             channelobj[message.guild.id] = {}
                         }
-                        if (channelobj[message.guild.id].tommorowssandwich == undefined){
-                            message.reply('Please set the tommorows-sandwich channel with `!setchannel tomorrows-sandwich`')
+                        if (channelobj[message.guild.id].tomorrowssandwich == undefined){
+                            message.reply('Please set the tomorrows-sandwich channel with `!setchannel tomorrows-sandwich`')
                             return
                         }
                         dssbDB.get('choices')
@@ -108,17 +108,17 @@ client.on('message', message => {
                                                     var selectedjson = JSON.stringify(selectedobj)
                                                     dssbDB.set('selected', selectedjson)
                                                 })
-                                            client.channels.get(channelobj[message.guild.id].tommorowssandwich).fetchMessages()
+                                            client.channels.get(channelobj[message.guild.id].tomorrowssandwich).fetchMessages()
                                                 .then((list)=>{
-                                                    return client.channels.get(channelobj[message.guild.id].tommorowssandwich).bulkDelete(list);
+                                                    return client.channels.get(channelobj[message.guild.id].tomorrowssandwich).bulkDelete(list);
                                                 })
                                                 .then(() => {
                                                     var remainingbalance = (balanceobj[message.guild.id] - selected.cost)/100
-                                                    client.channels.get(channelobj[message.guild.id].tommorowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ") -- $" + remainingbalance + " remain after purchase")
+                                                    client.channels.get(channelobj[message.guild.id].tomorrowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ") -- $" + remainingbalance + " remain after purchase")
                                                 })
                                                 .catch((err) => {
                                                     console.err(err)
-                                                    message.reply('Something went wrong while attempting to send the message to the tommorows-sandwich channel')
+                                                    message.reply('Something went wrong while attempting to send the message to the tomorrows-sandwich channel')
                                                 })
                                         },1500)
                                     })
@@ -142,12 +142,12 @@ client.on('message', message => {
                             channelobj[message.guild.id] = {}
                         }
                         switch (arguments[0].toLowerCase()) {
-                            case 'tommorows-sandwich':
-                                channelobj[message.guild.id].tommorowssandwich = message.channel.id
-                                message.reply('This channel has been set as the tommorows-sandwich channel')
+                            case 'tomorrows-sandwich':
+                                channelobj[message.guild.id].tomorrowssandwich = message.channel.id
+                                message.reply('This channel has been set as the tomorrows-sandwich channel')
                                 break
                             default:
-                                message.reply('Only valid channel to set is `tommorows-sandwich`')
+                                message.reply('Only valid channel to set is `tomorrows-sandwich`')
                                 break
                         }
                         var channeljson = JSON.stringify(channelobj)
