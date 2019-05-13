@@ -74,4 +74,6 @@ typings/
 
 # FuseBox cache
 .fusebox/
+
+# dssb database
 dssbDB.sqlite
