@@ -2,6 +2,7 @@
 require('dotenv').config()
 const TOKEN = process.env.TOKEN
 const PREFIX = process.env.PREFIX || '!'
+const ADMINROLE = process.env.ADMINROLE || 'Admin'
 var schedule = require('node-schedule')
 const Discord = require('discord.js')
 const client = new Discord.Client()
@@ -24,6 +25,7 @@ client.on('message', message => {
     const guildowner = message.channel.guild.ownerID
     const messageauthor = message.author.id
     const isGuildOwner = guildowner == messageauthor
+    const isAdmin = message.member.roles.find(role => role.name === ADMINROLE) || isGuildOwner
 
     switch (command) {
 
@@ -36,7 +38,7 @@ client.on('message', message => {
             return
 
         case `${PREFIX}reroll`:
-            if (isGuildOwner) {
+            if (isAdmin) {
                 dssbDB.get('channels')
                     .then((channels) => {
                         if (channels == undefined) {
@@ -125,12 +127,12 @@ client.on('message', message => {
                             })
                     })
             } else {
-                message.reply('Only the server owner can use this command.')
+                message.reply('Only server admins can use this command.')
             }
             return
 
         case `${PREFIX}setchannel`:
-            if (isGuildOwner) {
+            if (isAdmin) {
                 dssbDB.get('channels')
                     .then((channels) => {
                         if (channels == undefined) {
@@ -154,12 +156,12 @@ client.on('message', message => {
                         dssbDB.set('channels', channeljson)
                     })
             } else {
-                message.reply('Only the server owner can use this command.')
+                message.reply('Only server admins can use this command.')
             }
             return
 
         case `${PREFIX}addbalance`:
-            if (isGuildOwner) {
+            if (isAdmin) {
                 if (arguments[0] == undefined) {
                     message.reply('Please define how much balance to add')
                 } else {
@@ -186,12 +188,12 @@ client.on('message', message => {
                     }
                 }
             } else {
-                message.reply('Only the server owner can use this command.')
+                message.reply('Only server admins can use this command.')
             }
             break
 
         case `${PREFIX}subtractbalance`:
-            if (isGuildOwner) {
+            if (isAdmin) {
                 if (arguments[0] == undefined) {
                     message.reply('Please define how much balance to subtract')
                 } else {
@@ -218,7 +220,7 @@ client.on('message', message => {
                     }
                 }
             } else {
-                message.reply('Only the server owner can use this command.')
+                message.reply('Only server admins can use this command.')
             }
             break
 
@@ -253,7 +255,7 @@ client.on('message', message => {
             break
         
         case `${PREFIX}addchoice`:
-            if(isGuildOwner){
+            if(isAdmin){
                 if (arguments.length < 2) {
                     message.reply('To add a choice please use `' + PREFIX + 'addchoice <choice> <price in dollars>`')
                 } else {
@@ -320,12 +322,12 @@ client.on('message', message => {
                     }
                 }
             }else{
-                message.reply('Only the server owner can use this command.')
+                message.reply('Only server admins can use this command.')
             }
             break
         
         case `${PREFIX}removechoice`:
-            if(isGuildOwner){
+            if(isAdmin){
                 if (arguments.length < 1) {
                     message.reply('To remove a choice please use `' + PREFIX + 'removechoice <choice>`')
                 } else {
@@ -381,7 +383,7 @@ client.on('message', message => {
                         })
                 }
             }else{
-                message.reply('Only the server owner can use this command.')
+                message.reply('Only server admins can use this command.')
             }
             break
 
@@ -427,7 +429,7 @@ client.on('message', message => {
             break
 
         case `${PREFIX}blacklistchoice`:
-            if (isGuildOwner) {
+            if (isAdmin) {
                 if (arguments.length < 2){
                     message.reply('To blacklist a choice please use `' + PREFIX + 'blacklistchoice <choice> <amount of days>`')
                     return
@@ -475,7 +477,7 @@ client.on('message', message => {
                         message.reply('The blacklist is currently:\n' + choicelistStr)
                     })
             } else {
-                message.reply('Only the server owner can use this command.')
+                message.reply('Only server admins can use this command.')
             }
             break
 
