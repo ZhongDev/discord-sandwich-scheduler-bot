@@ -3,6 +3,7 @@ require('dotenv').config()
 const TOKEN = process.env.TOKEN
 const PREFIX = process.env.PREFIX || '!'
 const ADMINROLE = process.env.ADMINROLE || 'Admin'
+const BALANCEMANAGEROLE = process.env.BALANCEMANAGEROLE || 'Balance-Manage'
 var schedule = require('node-schedule')
 const Discord = require('discord.js')
 const client = new Discord.Client()
@@ -20,6 +21,7 @@ client.on('message', message => {
     const messageauthor = message.author.id
     const isGuildOwner = guildowner == messageauthor
     const isAdmin = message.member.roles.find(role => role.name === ADMINROLE) || isGuildOwner
+    const isBalanceManager = message.member.roles.find(role => role.name === BALANCEMANAGEROLE)
 
     switch (command) {
         case `${PREFIX}ping`:
@@ -39,19 +41,19 @@ client.on('message', message => {
             return
 
         case `${PREFIX}addbalance`:
-            dssb.addbalance(message, isAdmin, args)
+            dssb.addbalance(message, isAdmin, isBalanceManager, args)
             break
 
         case `${PREFIX}addbal`:
-            dssb.addbalance(message, isAdmin, args)
+            dssb.addbalance(message, isAdmin, isBalanceManager, args)
             break
 
         case `${PREFIX}subtractbalance`:
-            dssb.subtractbalance(message, isAdmin, args)
+            dssb.subtractbalance(message, isAdmin, isBalanceManager, args)
             break
 
         case `${PREFIX}subbal`:
-            dssb.subtractbalance(message, isAdmin, args)
+            dssb.subtractbalance(message, isAdmin, isBalanceManager, args)
             break
 
         case `${PREFIX}balance`:

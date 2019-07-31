@@ -93,8 +93,8 @@ class dssbExport {
         })
     }
 
-    static subtractbalance(message, isAdmin, args){
-        if (!isAdmin) {return message.reply('Only server admins can use this command.')}
+    static subtractbalance(message, isAdmin, isBalanceManager, args){
+        if (!isAdmin && !isBalanceManager) {return message.reply('Only server admins can use this command.')}
         if (args[0] == undefined) {return message.reply('Please define how much balance to subtract')}
         var moneymatches = args[0].match(moneyRgx)
         if(!moneymatches){return message.reply('The money value provided does not seem to be valid. Please try again.')}
@@ -109,8 +109,8 @@ class dssbExport {
         })
     }
 
-    static addbalance(message, isAdmin, args){
-        if (!isAdmin) {return message.reply('Only server admins can use this command.')}
+    static addbalance(message, isAdmin, isBalanceManager, args){
+        if (!isAdmin && !isBalanceManager) {return message.reply('Only server admins can use this command.')}
         if (args[0] == undefined) {return message.reply('Please define how much balance to add')}
         var moneymatches = args[0].match(moneyRgx)
         if (!moneymatches) {return message.reply('The money value provided does not seem to be valid. Please try again.')}
