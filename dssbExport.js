@@ -143,6 +143,85 @@ class dssbExport {
         })
     }
 
+    static choose(message, isAdmin, client, args) {
+        if (!isAdmin) {return message.reply('Only server admins can use this command.')}
+
+        var chosenSandwich = args.join(" ")
+
+        /// get variables
+        var channelobj, choicesobj, balanceobj
+        dssbDB.channels(message).then((obj) => { channelobj = obj })
+        .then(() => {
+            return dssbDB.choices(message)
+        })
+        .then((obj) => { choicesobj = obj })
+        .then(() => {
+            return dssbDB.balance(message)
+        })
+        .then((obj) => { balanceobj = obj })
+        .then(()=>{
+
+            /// checks
+            if (channelobj[message.guild.id].tomorrowssandwich == undefined){
+                message.reply('Please set the tomorrows-sandwich channel with `!setchannel tomorrows-sandwich`')
+                return
+            }
+            if (choicesobj[message.guild.id].length < 1){
+                message.reply('The choice list is empty. Please add choices to pick.')
+                return
+            }
+            if(balanceobj[message.guild.id] <= 0 ){
+                message.reply('You have no balance. Please add balance to roll.')
+                return
+            }
+            var choicesCanPayFor = choicesobj[message.guild.id].filter(choice => choice.cost <= balanceobj[message.guild.id])
+            if(choicesCanPayFor.length < 1){
+                message.reply('You don\'t have enough balance to pay for any choices. Please add balance enough balance to roll.')
+                return
+            }
+            var choicesNotBlacklisted = choicesCanPayFor.filter(choice => choice.blacklist - moment().unix()*1000 <= 0)
+            if(choicesNotBlacklisted.length < 1){
+                message.reply('Everything you can pay for has been blacklisted. Please either add balance so that a non-blacklisted item can be purchased, or remove items from the blacklist.')
+                return
+            }
+            var selectedArr = choicesNotBlacklisted.filter(choice => choice.sandwich.toLowerCase() == chosenSandwich.toLowerCase())
+            if(selectedArr.length < 1){
+                message.reply('The choice you chose was not found in the set of available choices. Please check that the item exists, and the spelling is correct.')
+                return
+            }
+
+            /// selctor
+            var selected = selectedArr[0]
+            var selectedSandwich = selected
+            message.reply("Selected " + selected.sandwich + " ($"+ selected.cost/100 + ")")
+            dssbDB.setSelected(selectedSandwich, message)
+            .then(()=>{
+                client.channels.get(channelobj[message.guild.id].tomorrowssandwich).fetchMessages()
+                .then((list)=>{
+                    return client.channels.get(channelobj[message.guild.id].tomorrowssandwich).bulkDelete(list);
+                })
+                .then(() => {
+                    var remainingbalance = (balanceobj[message.guild.id] - selected.cost)/100
+                    client.channels.get(channelobj[message.guild.id].tomorrowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ") -- $" + remainingbalance + " remain after purchase")
+                })
+                .catch((err) => {
+                    if(err.code == 50034){
+                        message.reply('The message/s in the tomorrows-sandwich channel are older than 14 days old and cannot be auto-deleted.\nPlease manually delete the old message/s')
+                        var remainingbalance = (balanceobj[message.guild.id] - selected.cost)/100
+                        client.channels.get(channelobj[message.guild.id].tomorrowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ") -- $" + remainingbalance + " remain after purchase")
+                    }else if(err.code == 50013){
+                        message.reply('The bot doesnt seem to have permission to delete messages in the tomorrows-sandwich channel. Please fix this if this is an issue.')
+                        var remainingbalance = (balanceobj[message.guild.id] - selected.cost)/100
+                        client.channels.get(channelobj[message.guild.id].tomorrowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ") -- $" + remainingbalance + " remain after purchase")
+                    }else{
+                        console.error(err)
+                        message.reply('Something went wrong while attempting to send the message to the tomorrows-sandwich channel')
+                    }
+                })
+            })
+        })
+    }
+
     static reroll(message, isAdmin, client) {
         if (!isAdmin) {return message.reply('Only server admins can use this command.')}
 
@@ -202,6 +281,10 @@ class dssbExport {
                     .catch((err) => {
                         if(err.code == 50034){
                             message.reply('The message/s in the tomorrows-sandwich channel are older than 14 days old and cannot be auto-deleted.\nPlease manually delete the old message/s')
+                            var remainingbalance = (balanceobj[message.guild.id] - selected.cost)/100
+                            client.channels.get(channelobj[message.guild.id].tomorrowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ") -- $" + remainingbalance + " remain after purchase")
+                        }else if(err.code == 50013){
+                            message.reply('The bot doesnt seem to have permission to delete messages in the tomorrows-sandwich channel. Please fix this if this is an issue.')
                             var remainingbalance = (balanceobj[message.guild.id] - selected.cost)/100
                             client.channels.get(channelobj[message.guild.id].tomorrowssandwich).send(selected.sandwich + " ($"+ selected.cost/100 + ") -- $" + remainingbalance + " remain after purchase")
                         }else{

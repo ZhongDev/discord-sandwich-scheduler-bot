@@ -32,6 +32,10 @@ client.on('message', message => {
             message.reply('Your discord author id is ' + messageauthor)
             return
 
+        case `${PREFIX}choose`:
+            dssb.choose(message, isAdmin, client, args)
+            return
+
         case `${PREFIX}reroll`:
             dssb.reroll(message, isAdmin, client)
             return
